@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.snakeminer.game.config.GameConfig;
 
 /**
  * Created by Gabriel on 11/12/2017.
@@ -25,7 +26,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class GameScreen extends ScreenAdapter{
 
     public static final String SCORE_TEXT = "Score: ";
-    private static final String GAME_OVER_TEXT = "Game Over... Tap space to restart!";
+    private static final String GAME_OVER_TEXT = "Game Over... Tap SPACE to restart!";
     private static final int POINTS_PER_GOLD = 20;
     private static final int GRID_CELL = 32;
     private static final float MOVE_TIME = 0.2F;
@@ -35,8 +36,7 @@ public class GameScreen extends ScreenAdapter{
     private static final int UP = 2;
     private static final int DOWN = 3;
 
-    private static final float WORLD_WIDTH = 640;
-    private static final float WORLD_HEIGHT = 480;
+
 
     private int truckDirection = RIGHT;
     private float timer = MOVE_TIME;
@@ -70,9 +70,9 @@ public class GameScreen extends ScreenAdapter{
 
     @Override
     public void show() {
-        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+        viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
         camera = new OrthographicCamera(viewport.getWorldWidth(), viewport.getWorldHeight());
-        camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
+        camera.position.set(GameConfig.WORLD_WIDTH / 2, GameConfig.WORLD_HEIGHT / 2, 0);
         camera.update();
         bitmapFont = new BitmapFont();
         shapeRenderer = new ShapeRenderer();
