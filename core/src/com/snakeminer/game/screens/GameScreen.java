@@ -26,6 +26,7 @@ import com.snakeminer.game.config.GameConfig;
 public class GameScreen extends ScreenAdapter{
 
     public static final String SCORE_TEXT = "Score: ";
+    public static final String HIGH_SCORE_TEXT = "Hight Score: ";
     private static final String GAME_OVER_TEXT = "Game Over... Tap SPACE to restart!";
     private static final int POINTS_PER_GOLD = 20;
     private static final int GRID_CELL = 32;
@@ -41,6 +42,7 @@ public class GameScreen extends ScreenAdapter{
     private int truckDirection = RIGHT;
     private float timer = MOVE_TIME;
     private int score = 0;
+    private int highScore = 0;
 
     private SpriteBatch batch;
     private Texture truckHead;
@@ -130,14 +132,12 @@ public class GameScreen extends ScreenAdapter{
         if (goldAvailable) {
             batch.draw(gold, goldX, goldY);
         }
-        if (state == STATE.GAME_OVER) {
-            layout.setText(bitmapFont, GAME_OVER_TEXT);
-            bitmapFont.draw(batch, GAME_OVER_TEXT, (viewport.getWorldWidth() -
-                    layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
-        }
+        drawGameOver();
         drawScore();
         batch.end();
     }
+
+
 
     private void checkForOutOfBounds() {
         if (truckX >= viewport.getWorldWidth()) {
@@ -302,6 +302,29 @@ public class GameScreen extends ScreenAdapter{
         if (state == STATE.PLAYING) {
             String scoreAsString = Integer.toString(score);
             bitmapFont.draw(batch, SCORE_TEXT + scoreAsString, (viewport.getWorldWidth()/15), ( viewport.getWorldHeight() -10));
+        }
+    }
+    private void drawGameOver() {
+        if (state == STATE.GAME_OVER) {
+
+            if(highScore <score){ highScore = score;}
+
+            String scoreAsString = Integer.toString(score);
+            String highScoreAsString = Integer.toString(highScore);
+
+            layout.setText(bitmapFont, HIGH_SCORE_TEXT + highScoreAsString);
+            bitmapFont.draw(batch, HIGH_SCORE_TEXT + highScoreAsString, (viewport.getWorldWidth() -
+                    layout.width) / 2, ((viewport.getWorldHeight() - layout.height) / 2)+40);
+
+
+            layout.setText(bitmapFont, SCORE_TEXT + scoreAsString);
+            bitmapFont.draw(batch, SCORE_TEXT + scoreAsString, (viewport.getWorldWidth() -
+                    layout.width) / 2, ((viewport.getWorldHeight() - layout.height) / 2)+20);
+
+
+            layout.setText(bitmapFont, GAME_OVER_TEXT);
+            bitmapFont.draw(batch, GAME_OVER_TEXT, (viewport.getWorldWidth() -
+                    layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
         }
     }
 }
