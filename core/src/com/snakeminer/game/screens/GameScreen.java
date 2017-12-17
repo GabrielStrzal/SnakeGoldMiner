@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.snakeminer.game.config.GameConfig;
+import com.snakeminer.game.utils.GdxUtils;
 
 /**
  * Created by Gabriel on 11/12/2017.
@@ -99,7 +100,7 @@ public class GameScreen extends ScreenAdapter{
             }
             break;
         }
-        clearScreen();
+        GdxUtils.clearScreen();
         if(gridOnOff) {drawGrid();}
         draw();
     }
@@ -117,10 +118,6 @@ public class GameScreen extends ScreenAdapter{
         }
     }
 
-    private void clearScreen() {
-        Gdx.gl.glClearColor(Color.BLACK.r, Color.BLACK.g, Color.BLACK.b, Color.BLACK.a);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-    }
     private void draw() {
         batch.setProjectionMatrix(camera.projection);
         batch.setTransformMatrix(camera.view);
