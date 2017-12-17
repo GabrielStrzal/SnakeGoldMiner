@@ -312,19 +312,15 @@ public class GameScreen extends ScreenAdapter{
             String scoreAsString = Integer.toString(score);
             String highScoreAsString = Integer.toString(highScore);
 
-            layout.setText(bitmapFont, HIGH_SCORE_TEXT + highScoreAsString);
-            bitmapFont.draw(batch, HIGH_SCORE_TEXT + highScoreAsString, (viewport.getWorldWidth() -
-                    layout.width) / 2, ((viewport.getWorldHeight() - layout.height) / 2)+40);
-
-
-            layout.setText(bitmapFont, SCORE_TEXT + scoreAsString);
-            bitmapFont.draw(batch, SCORE_TEXT + scoreAsString, (viewport.getWorldWidth() -
-                    layout.width) / 2, ((viewport.getWorldHeight() - layout.height) / 2)+20);
-
-
-            layout.setText(bitmapFont, GAME_OVER_TEXT);
-            bitmapFont.draw(batch, GAME_OVER_TEXT, (viewport.getWorldWidth() -
-                    layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
+            drawTextOnScreenCenter(HIGH_SCORE_TEXT + highScoreAsString, 0, 40);
+            drawTextOnScreenCenter(SCORE_TEXT + scoreAsString, 0 , 20);
+            drawTextOnScreenCenter(GAME_OVER_TEXT, 0, 0);
         }
+    }
+    private void drawTextOnScreenCenter(String text, float differenceX, float differenceY){
+        layout.setText(bitmapFont, text);
+        bitmapFont.draw(batch, text,
+                ((viewport.getWorldWidth() - layout.width) / 2) + differenceX,
+                ((viewport.getWorldHeight() - layout.height) / 2) + differenceY);
     }
 }
