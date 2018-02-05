@@ -69,6 +69,8 @@ public class GameScreen extends ScreenAdapter{
     private boolean hasHit = false;
     private boolean gridOnOff = false;
 
+    private int direction = 1;
+
     private int truckXBeforeUpdate = 0, truckYBeforeUpdate = 0;
 
     @Override
@@ -89,6 +91,7 @@ public class GameScreen extends ScreenAdapter{
         switch(state) {
             case PLAYING: {
                 queryInput();
+                queryTouchInput();
                 turnGridOnOff();
                 updateTruck(delta);
                 checkGoldCollision();
@@ -182,6 +185,32 @@ public class GameScreen extends ScreenAdapter{
         if (rPressed) updateDirection(RIGHT);
         if (uPressed) updateDirection(UP);
         if (dPressed) updateDirection(DOWN);
+    }
+    private void queryTouchInput(){
+        if (Gdx.input.isTouched() && !directionSet) {
+            if (Gdx.input.getX() > Gdx.graphics.getWidth() / 2) {
+                if(direction == 3) {
+                    direction = 0;
+                }else {
+                   direction++;
+                }
+            }else {
+                if(direction == 0) {
+                    direction = 3;
+                }else {
+                    direction--;
+                }
+            }
+            directionSet = true;
+            if (direction == 0) truckDirection = UP;
+            if (direction == 1) truckDirection = RIGHT;
+            if (direction == 2) truckDirection = DOWN;
+            if (direction == 3) truckDirection = LEFT;
+        }
+
+
+
+
     }
 
     private void turnGridOnOff(){
