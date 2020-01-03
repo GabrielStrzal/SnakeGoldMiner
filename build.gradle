@@ -65,6 +65,8 @@ project(":html") {
         api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion:sources"
         api "com.badlogicgames.gdx:gdx-box2d-gwt:$gdxVersion:sources"
+        compile "com.strzal:gdxUtilLib:1.0-SNAPSHOT"
+        compile "com.strzal:gdxUtilLib:1.0-SNAPSHOT:sources"
         
     }
 }
@@ -76,6 +78,6 @@ project(":core") {
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-        
+        api "com.strzal:gdxUtilLib:1.0-SNAPSHOT"
     }
 }
