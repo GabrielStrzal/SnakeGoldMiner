@@ -4,13 +4,14 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
 import com.strzal.snakeminer.SnakeGoldMiner;
+import com.strzal.snakeminer.config.GameConfig;
 
 public class HtmlLauncher extends GwtApplication {
 
         // USE THIS CODE FOR A FIXED SIZE APPLICATION
         @Override
         public GwtApplicationConfiguration getConfig () {
-                return new GwtApplicationConfiguration(480, 320);
+                return new GwtApplicationConfiguration((int) GameConfig.WORLD_WIDTH, (int)GameConfig.WORLD_HEIGHT);
         }
         // END CODE FOR FIXED SIZE APPLICATION
 
