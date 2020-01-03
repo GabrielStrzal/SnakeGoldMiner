@@ -1,11 +1,9 @@
-package com.snakeminer.game.screens;
+package com.strzal.snakeminer.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -17,8 +15,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.snakeminer.game.config.GameConfig;
-import com.snakeminer.game.utils.GdxUtils;
+import com.strzal.snakeminer.config.GameConfig;
+import com.strzal.snakeminer.utils.GdxUtils;
 
 /**
  * Created by Gabriel on 11/12/2017.

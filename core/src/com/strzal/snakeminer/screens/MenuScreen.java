@@ -1,4 +1,4 @@
-package com.snakeminer.game.screens;
+package com.strzal.snakeminer.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -9,9 +9,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.snakeminer.game.SnakeGoldMiner;
-import com.snakeminer.game.config.GameConfig;
-import com.snakeminer.game.utils.GdxUtils;
+import com.strzal.snakeminer.SnakeGoldMiner;
+import com.strzal.snakeminer.config.GameConfig;
+import com.strzal.snakeminer.utils.GdxUtils;
 
 /**
  * Created by lelo on 15/12/17.

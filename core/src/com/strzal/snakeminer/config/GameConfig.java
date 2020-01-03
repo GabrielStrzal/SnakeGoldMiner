@@ -1,4 +1,4 @@
-package com.snakeminer.game.config;
+package com.strzal.snakeminer.config;
 
 
 public class GameConfig {

@@ -1,4 +1,4 @@
-package com.snakeminer.game.utils;
+package com.strzal.snakeminer.utils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
