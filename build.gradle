@@ -69,6 +69,8 @@ project(":html") {
         api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion:sources"
         api "com.badlogicgames.gdx:gdx-box2d-gwt:$gdxVersion:sources"
+        api "com.github.tommyettinger:regexodus:$regExodusVersion:sources"
+        api "com.rafaskoberg.gdx:typing-label:$typingLabelVersion:sources"
         compile "com.strzal:gdxUtilLib:1.0-SNAPSHOT"
         compile "com.strzal:gdxUtilLib:1.0-SNAPSHOT:sources"
         
