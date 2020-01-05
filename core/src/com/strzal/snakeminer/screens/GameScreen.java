@@ -2,6 +2,7 @@ package com.strzal.snakeminer.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -15,8 +16,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.strzal.gdxUtilLib.utils.GdxUtils;
+import com.strzal.snakeminer.SnakeGoldMiner;
 import com.strzal.snakeminer.config.GameConfig;
-import com.strzal.snakeminer.utils.GdxUtils;
+import com.strzal.snakeminer.handler.GameStatsHandler;
+import com.strzal.snakeminer.hud.Hud;
 
 /**
  * Created by Gabriel on 11/12/2017.
@@ -41,7 +45,7 @@ public class GameScreen extends ScreenAdapter{
     private int truckDirection = RIGHT;
     private float timer = MOVE_TIME;
     private int score = 0;
-    private int highScore = 0;
+    private int highScore;
 
     private SpriteBatch batch;
     private Texture truckHead;
@@ -52,6 +56,9 @@ public class GameScreen extends ScreenAdapter{
     private ShapeRenderer shapeRenderer;
     private BitmapFont bitmapFont;
     private GlyphLayout layout = new GlyphLayout();
+    private Hud hud;
+
+    private GameStatsHandler gameStatsHandler;
 
     private enum STATE {
         PLAYING, GAME_OVER
@@ -71,11 +78,21 @@ public class GameScreen extends ScreenAdapter{
 
     private int truckXBeforeUpdate = 0, truckYBeforeUpdate = 0;
 
+
+    public GameScreen(SnakeGoldMiner game){
+        gameStatsHandler = game.getGameStatsHandler();
+        highScore = gameStatsHandler.getSavedData().getHighScore();
+        hud = new Hud(game, this);
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(hud.getStage());
+        Gdx.input.setInputProcessor(inputMultiplexer);
+    }
+
     @Override
     public void show() {
-        viewport = new FitViewport(GameConfig.WORLD_WIDTH, GameConfig.WORLD_HEIGHT, camera);
+        viewport = new FitViewport(GameConfig.SCREEN_WIDTH, GameConfig.SCREEN_HEIGHT, camera);
         camera = new OrthographicCamera(viewport.getWorldWidth(), viewport.getWorldHeight());
-        camera.position.set(GameConfig.WORLD_WIDTH / 2, GameConfig.WORLD_HEIGHT / 2, 0);
+        camera.position.set(GameConfig.SCREEN_WIDTH / 2, GameConfig.SCREEN_HEIGHT / 2, 0);
         camera.update();
         bitmapFont = new BitmapFont();
         shapeRenderer = new ShapeRenderer();
@@ -104,6 +121,7 @@ public class GameScreen extends ScreenAdapter{
         GdxUtils.clearScreen();
         if(gridOnOff) {drawGrid();}
         draw();
+        hud.draw();
     }
     private void updateTruck(float delta) {
         if(!hasHit) {
@@ -300,7 +318,10 @@ public class GameScreen extends ScreenAdapter{
     }
     private void checkTruckBodyCollision() {
         for (BodyPart bodyPart : bodyParts) {
-            if (bodyPart.x == truckX && bodyPart.y == truckY) state = STATE.GAME_OVER;
+            if (bodyPart.x == truckX && bodyPart.y == truckY){
+                state = STATE.GAME_OVER;
+                gameStatsHandler.saveLevelData(score);
+            }
         }
     }
     private void checkForRestart() {
@@ -331,10 +352,8 @@ public class GameScreen extends ScreenAdapter{
     private void drawGameOver() {
         if (state == STATE.GAME_OVER) {
 
-            if(highScore <score){ highScore = score;}
-
             String scoreAsString = Integer.toString(score);
-            String highScoreAsString = Integer.toString(highScore);
+            String highScoreAsString = Integer.toString(gameStatsHandler.getSavedData().getHighScore());
 
             drawTextOnScreenCenter(HIGH_SCORE_TEXT + highScoreAsString, 0, 40);
             drawTextOnScreenCenter(SCORE_TEXT + scoreAsString, 0 , 20);
@@ -346,5 +365,9 @@ public class GameScreen extends ScreenAdapter{
         bitmapFont.draw(batch, text,
                 ((viewport.getWorldWidth() - layout.width) / 2) + differenceX,
                 ((viewport.getWorldHeight() - layout.height) / 2) + differenceY);
+    }
+
+    public int getScore() {
+        return score;
     }
 }

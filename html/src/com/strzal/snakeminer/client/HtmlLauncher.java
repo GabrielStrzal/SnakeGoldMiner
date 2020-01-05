@@ -11,7 +11,7 @@ public class HtmlLauncher extends GwtApplication {
         // USE THIS CODE FOR A FIXED SIZE APPLICATION
         @Override
         public GwtApplicationConfiguration getConfig () {
-                return new GwtApplicationConfiguration((int) GameConfig.WORLD_WIDTH, (int)GameConfig.WORLD_HEIGHT);
+                return new GwtApplicationConfiguration((int) GameConfig.SCREEN_WIDTH, (int)GameConfig.SCREEN_HEIGHT);
         }
         // END CODE FOR FIXED SIZE APPLICATION
 
