@@ -1,9 +1,11 @@
 package com.strzal.snakeminer.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -43,42 +45,58 @@ public class TextScreen extends BasicMenuScreen {
                         new TextureRegionDrawable(button),
                         font);
 
-        ImageTextButton nextImageButton = new ImageTextButton("Next", style);
+        ImageTextButton backButton = new ImageTextButton("Back", style);
+        backButton.getLabel().setColor(com.badlogic.gdx.graphics.Color.YELLOW);
 
         Image background = new Image((Texture) game.getAssetManager().get(ImagesPaths.GAME_TEXT_BACKGROUND));
 
-        nextImageButton.addListener(new ClickListener() {
+        backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                switch (gameMode) {
-                    case STORY_MODE:
-                        ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, false);
-                        break;
-                    case ENDLESS_MODE:
-                        ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, true);
-                        break;
-                    case LEVEL_COMPLETED:
-                        ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, false);
-                        break;
-                    case LEVEL_COMPLETED_ENDLESS:
-                        ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, true);
-                        break;
-                    default:
-                        ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
-                        break;
+                goBack();
+            }
+        });
+
+        stage.addListener(new InputListener() {
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.ENTER || keycode == Input.Keys.BACKSPACE) {
+                    goBack();
+                    return true;
                 }
+                return false;
             }
         });
 
         Table mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.bottom().padBottom(30);
-        mainTable.add(nextImageButton).padBottom(10);
+        mainTable.add(backButton).padBottom(10);
 
         stage.addActor(background);
         stage.addActor(mainTable);
 
         initText();
+    }
+
+    private void goBack() {
+        switch (gameMode) {
+            case STORY_MODE:
+                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, false);
+                break;
+            case ENDLESS_MODE:
+                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, true);
+                break;
+            case LEVEL_COMPLETED:
+                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, false);
+                break;
+            case LEVEL_COMPLETED_ENDLESS:
+                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, true);
+                break;
+            default:
+                ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
+                break;
+        }
     }
 
     private void initText() {

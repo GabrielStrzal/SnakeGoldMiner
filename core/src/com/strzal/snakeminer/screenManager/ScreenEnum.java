@@ -9,6 +9,7 @@ import com.strzal.snakeminer.SnakeGoldMiner;
 import com.strzal.snakeminer.screens.GameModeEnum;
 import com.strzal.snakeminer.screens.GameScreen;
 import com.strzal.snakeminer.screens.MenuScreen;
+import com.strzal.snakeminer.screens.StoryGameScreen;
 import com.strzal.snakeminer.screens.TextScreen;
 
 
@@ -35,6 +36,11 @@ public enum ScreenEnum implements ScreenEnumInterface {
     MENU_SCREEN {
         public Screen getScreen(Object... params) {
             return new MenuScreen((SnakeGoldMiner)params[0]);
+        }
+    },
+    STORY_GAME_SCREEN {
+        public Screen getScreen(Object... params) {
+            return new StoryGameScreen((SnakeGoldMiner)params[0], (Integer)params[1]);
         }
     },
 //    TUTORIAL_SCREEN {
