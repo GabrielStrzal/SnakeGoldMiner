@@ -21,12 +21,10 @@ import com.strzal.snakeminer.screenManager.ScreenEnum;
 public class TextScreen extends BasicMenuScreen {
 
     private String textToBeDisplayed;
-    private GameModeEnum gameMode;
 
     public TextScreen(BasicGame game, String textToBeDisplayed, GameModeEnum gameMode) {
         super(game);
         this.textToBeDisplayed = textToBeDisplayed;
-        this.gameMode = gameMode;
     }
 
     @Override
@@ -80,23 +78,7 @@ public class TextScreen extends BasicMenuScreen {
     }
 
     private void goBack() {
-        switch (gameMode) {
-            case STORY_MODE:
-                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, false);
-                break;
-            case ENDLESS_MODE:
-                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, true);
-                break;
-            case LEVEL_COMPLETED:
-                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, false);
-                break;
-            case LEVEL_COMPLETED_ENDLESS:
-                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, true);
-                break;
-            default:
-                ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
-                break;
-        }
+        ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
     }
 
     private void initText() {

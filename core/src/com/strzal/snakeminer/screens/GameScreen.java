@@ -334,7 +334,7 @@ public class GameScreen extends ScreenAdapter{
     }
 
     private void checkForRestart() {
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) doRestart();
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) || Gdx.input.isKeyPressed(Input.Keys.ENTER)) doRestart();
     }
 
     private void doRestart() {

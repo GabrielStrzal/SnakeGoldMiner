@@ -27,6 +27,7 @@ import com.strzal.snakeminer.achievement.AchievementEnum;
 import com.strzal.snakeminer.config.GameConfig;
 import com.strzal.snakeminer.config.ImagesPaths;
 import com.strzal.snakeminer.handler.LevelStats;
+import com.strzal.snakeminer.hud.AchievementBanner;
 import com.strzal.snakeminer.levels.LevelData;
 import com.strzal.snakeminer.screenManager.ScreenEnum;
 
@@ -75,6 +76,7 @@ public class StoryGameScreen extends ScreenAdapter {
     private FitViewport viewport;
     private Texture truckHeadTex, goldTex, truckBodyTex;
     private Stage hudStage;
+    private AchievementBanner achievementBanner;
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -126,6 +128,9 @@ public class StoryGameScreen extends ScreenAdapter {
             }
         });
         hudStage.addActor(exitButton);
+
+        achievementBanner = new AchievementBanner();
+        hudStage.addActor(achievementBanner);
 
         InputMultiplexer im = new InputMultiplexer();
         im.addProcessor(hudStage);
@@ -357,7 +362,7 @@ public class StoryGameScreen extends ScreenAdapter {
                 storyCompleted
         );
         for (AchievementEnum ach : newlyUnlocked) {
-            // Banner not available in StoryGameScreen (no Hud), so just silently unlock
+            achievementBanner.show(ach);
         }
     }
 
@@ -449,6 +454,7 @@ public class StoryGameScreen extends ScreenAdapter {
         truckHeadTex.dispose();
         goldTex.dispose();
         truckBodyTex.dispose();
+        achievementBanner.dispose();
         hudStage.dispose();
     }
 
