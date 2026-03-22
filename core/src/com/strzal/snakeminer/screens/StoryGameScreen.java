@@ -23,10 +23,14 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.strzal.gdxUtilLib.screenManager.ScreenManager;
 import com.strzal.gdxUtilLib.utils.GdxUtils;
 import com.strzal.snakeminer.SnakeGoldMiner;
+import com.strzal.snakeminer.achievement.AchievementEnum;
 import com.strzal.snakeminer.config.GameConfig;
 import com.strzal.snakeminer.config.ImagesPaths;
+import com.strzal.snakeminer.handler.LevelStats;
 import com.strzal.snakeminer.levels.LevelData;
 import com.strzal.snakeminer.screenManager.ScreenEnum;
+
+import java.util.List;
 
 public class StoryGameScreen extends ScreenAdapter {
 
@@ -117,7 +121,7 @@ public class StoryGameScreen extends ScreenAdapter {
         exitButton.setPosition(GameConfig.SCREEN_WIDTH - 80, GameConfig.SCREEN_HEIGHT - 30);
         exitButton.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
-                saveSessionIfNeeded();
+                saveSessionIfNeeded(false);
                 ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
             }
         });
@@ -170,11 +174,11 @@ public class StoryGameScreen extends ScreenAdapter {
                 updateSnake(delta);
                 break;
             case LEVEL_COMPLETE:
-                if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
+                if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER))
                     loadLevel(currentLevel + 1);
                 break;
             case GAME_OVER:
-                if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
+                if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER))
                     loadLevel(currentLevel);
                 if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
                     ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
@@ -183,6 +187,7 @@ public class StoryGameScreen extends ScreenAdapter {
                 break;
             case YOU_WON:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
+                        Gdx.input.isKeyJustPressed(Input.Keys.ENTER) ||
                         Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
                     ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
                     return;
@@ -325,18 +330,34 @@ public class StoryGameScreen extends ScreenAdapter {
 
     private void triggerGameOver() {
         state = State.GAME_OVER;
-        saveSessionIfNeeded();
+        saveSessionIfNeeded(false);
     }
 
     private void triggerLevelComplete() {
-        state = (currentLevel >= LevelData.totalLevels()) ? State.YOU_WON : State.LEVEL_COMPLETE;
-        saveSessionIfNeeded();
+        boolean won = currentLevel >= LevelData.totalLevels();
+        state = won ? State.YOU_WON : State.LEVEL_COMPLETE;
+        saveSessionIfNeeded(won);
     }
 
-    private void saveSessionIfNeeded() {
+    private void saveSessionIfNeeded(boolean storyJustCompleted) {
         if (!sessionSaved) {
             game.getGameStatsHandler().saveLevelData(score, goldCollectedThisLevel, (int) sessionTime);
+            if (storyJustCompleted) game.getGameStatsHandler().saveStoryCompleted();
+            checkAchievements(storyJustCompleted);
             sessionSaved = true;
+        }
+    }
+
+    private void checkAchievements(boolean storyCompleted) {
+        LevelStats saved = game.getGameStatsHandler().getSavedData();
+        List<AchievementEnum> newlyUnlocked = game.getAchievementHandler().checkAndUnlock(
+                saved.getTotalTimesPlayed(),
+                saved.getTotalGoldCollected(),
+                saved.getTotalPlayTimeSeconds(),
+                storyCompleted
+        );
+        for (AchievementEnum ach : newlyUnlocked) {
+            // Banner not available in StoryGameScreen (no Hud), so just silently unlock
         }
     }
 
@@ -396,11 +417,11 @@ public class StoryGameScreen extends ScreenAdapter {
                 10, GameConfig.SCREEN_HEIGHT - 10);
 
         if (state == State.LEVEL_COMPLETE)
-            drawCentered("Level " + currentLevel + " Complete!  SPACE for next level", 0);
+            drawCentered("Level " + currentLevel + " Complete!  SPACE/ENTER for next level", 0);
         else if (state == State.GAME_OVER)
-            drawCentered("Game Over!  SPACE to retry   ESC for menu", 0);
+            drawCentered("Game Over!  SPACE/ENTER to retry   ESC for menu", 0);
         else if (state == State.YOU_WON)
-            drawCentered("You Won! Congratulations!  SPACE or ESC for menu", 0);
+            drawCentered("You Won! Congratulations!  SPACE/ENTER or ESC for menu", 0);
 
         batch.end();
     }

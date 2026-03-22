@@ -32,7 +32,7 @@ public class GameScreen extends ScreenAdapter{
 
     public static final String SCORE_TEXT = "Score: ";
     public static final String HIGH_SCORE_TEXT = "Hight Score: ";
-    private static final String GAME_OVER_TEXT = "Game Over... Tap SPACE to restart!";
+    private static final String GAME_OVER_TEXT = "Game Over... Tap SPACE/ENTER to restart!";
     private static final int POINTS_PER_GOLD = 20;
     private static final int GRID_CELL = 32;
     private static final float MOVE_TIME = 0.2F;
@@ -271,7 +271,7 @@ public class GameScreen extends ScreenAdapter{
         int totalTime  = saved.getTotalPlayTimeSeconds()  + (int) sessionTime;
         int totalPlays = saved.getTotalTimesPlayed();
 
-        List<AchievementEnum> newlyUnlocked = achievementHandler.checkAndUnlock(totalPlays, totalGold, totalTime);
+        List<AchievementEnum> newlyUnlocked = achievementHandler.checkAndUnlock(totalPlays, totalGold, totalTime, false);
         for (AchievementEnum ach : newlyUnlocked) {
             hud.showAchievementBanner(ach);
         }

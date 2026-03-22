@@ -56,6 +56,11 @@ public class MenuScreen extends BasicMenuScreen {
         ImageTextButton gameStatsButton = new ImageTextButton("Game Stats", style);
         ImageTextButton trophiesButton  = new ImageTextButton("Trophies", style);
 
+        boolean storyCompleted = game.getGameStatsHandler().isStoryCompleted();
+        if (!storyCompleted) {
+            endlessButton.getLabel().setColor(Color.GRAY);
+        }
+
         Image background = new Image((Texture) game.getAssetManager().get(ImagesPaths.MENU_BACKGROUND));
 
         final Runnable goStory = new Runnable() {
@@ -90,9 +95,11 @@ public class MenuScreen extends BasicMenuScreen {
         storyButton.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { goStory.run(); }
         });
-        endlessButton.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) { goEndless.run(); }
-        });
+        if (storyCompleted) {
+            endlessButton.addListener(new ClickListener() {
+                @Override public void clicked(InputEvent event, float x, float y) { goEndless.run(); }
+            });
+        }
         gameStatsButton.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) { goStats.run(); }
         });
@@ -103,7 +110,9 @@ public class MenuScreen extends BasicMenuScreen {
         navButtons.clear();
         navActions.clear();
         navButtons.add(storyButton);     navActions.add(goStory);
-        navButtons.add(endlessButton);   navActions.add(goEndless);
+        if (storyCompleted) {
+            navButtons.add(endlessButton); navActions.add(goEndless);
+        }
         navButtons.add(gameStatsButton); navActions.add(goStats);
         navButtons.add(trophiesButton);  navActions.add(goTrophies);
 

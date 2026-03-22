@@ -107,7 +107,7 @@ public class TextScreen extends BasicMenuScreen {
         mainTable.setFillParent(true);
         mainTable.left().top();
         mainTable.padLeft(90);
-        mainTable.padTop(200);
+        mainTable.padTop(100);
         mainTable.add(label).width(460f);
 
         stage.addActor(mainTable);
