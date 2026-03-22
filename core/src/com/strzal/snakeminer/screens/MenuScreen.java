@@ -25,21 +25,16 @@ public class MenuScreen extends BasicMenuScreen {
 
     @Override
     public void show() {
-        //Stage should control input:
         Gdx.input.setInputProcessor(stage);
 
-        //Create Table
         Table mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.bottom().padBottom(30);
 
-
-
-        Texture button = assetManager.get(ImagesPaths.MENU_BUTTON);
+        Texture button         = assetManager.get(ImagesPaths.MENU_BUTTON);
         Texture button_pressed = assetManager.get(ImagesPaths.MENU_BUTTON_PRESSED);
 
         BitmapFont font = new BitmapFont();
-
 
         ImageTextButton.ImageTextButtonStyle style =
                 new ImageTextButton.ImageTextButtonStyle(
@@ -48,22 +43,17 @@ public class MenuScreen extends BasicMenuScreen {
                         new TextureRegionDrawable(button),
                         font);
 
-        //Create buttons
-        ImageTextButton playImageButton = new ImageTextButton("Play" ,style);
-        ImageTextButton gameStatsButton = new ImageTextButton("Game Stats" ,style);
-        ImageTextButton trophiesButton = new ImageTextButton("Trophies" ,style);
-        ImageTextButton tutorialStatsButton = new ImageTextButton("Instructions" ,style);
-
+        ImageTextButton playImageButton      = new ImageTextButton("Play", style);
+        ImageTextButton gameStatsButton      = new ImageTextButton("Game Stats", style);
+        ImageTextButton trophiesButton       = new ImageTextButton("Trophies", style);
+        ImageTextButton tutorialStatsButton  = new ImageTextButton("Instructions", style);
 
         Image background = new Image((Texture) game.getAssetManager().get(ImagesPaths.MENU_BACKGROUND));
 
-        //Add listeners to buttons
         playImageButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ScreenManager.getInstance().showScreen(
-                        ScreenEnum.GAME_SCREEN, game
-                );
+                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game);
             }
         });
 
@@ -80,22 +70,20 @@ public class MenuScreen extends BasicMenuScreen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ScreenManager.getInstance().showScreen(
-                        ScreenEnum.TEXT_SCREEN, game, GameTexts.GAME_TROPHIES_TEXT, GameModeEnum.TROPHIES
+                        ScreenEnum.TEXT_SCREEN, game,
+                        game.getAchievementHandler().getDisplayText(),
+                        GameModeEnum.TROPHIES
                 );
             }
         });
 
-
-        //Add buttons to table
         mainTable.add(playImageButton).padBottom(10);
         mainTable.row();
         mainTable.add(gameStatsButton).padBottom(10);
         mainTable.row();
         mainTable.add(trophiesButton).padBottom(10);
-        //mainTable.add(tutorialStatsButton);
 
         stage.addActor(background);
-        //Add table to stage
         stage.addActor(mainTable);
         addVersionText();
     }

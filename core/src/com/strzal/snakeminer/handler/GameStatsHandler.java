@@ -1,36 +1,48 @@
 package com.strzal.snakeminer.handler;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 
 public class GameStatsHandler {
 
-    Preferences prefs = Gdx.app.getPreferences("snake_gold_miner_v1_0");
+    private static final String KEY_TIMES_PLAYED    = "totalTimesPlayed";
+    private static final String KEY_HIGH_SCORE       = "highScore";
+    private static final String KEY_TOTAL_GOLD       = "totalGoldCollected";
+    private static final String KEY_TOTAL_TIME       = "totalPlayTimeSeconds";
 
-    public GameStatsHandler() {
-    }
+    private final Preferences prefs = Gdx.app.getPreferences("snake_gold_miner_v1_0");
 
-    public void saveLevelData(int levelHighScore){
+    public GameStatsHandler() {}
 
-        //total plays
-        int totalTimesPlayed = prefs.getInteger("totalTimesPlayed", 0);
-        prefs.putInteger("totalTimesPlayed", ++totalTimesPlayed);
+    /**
+     * Saves end-of-session data.
+     *
+     * @param score               final score for this session
+     * @param sessionGoldCollected gold pieces collected this session
+     * @param sessionTimeSeconds  seconds spent playing this session
+     */
+    public void saveLevelData(int score, int sessionGoldCollected, int sessionTimeSeconds) {
+        int totalTimesPlayed = prefs.getInteger(KEY_TIMES_PLAYED, 0);
+        prefs.putInteger(KEY_TIMES_PLAYED, ++totalTimesPlayed);
 
+        int highScore = prefs.getInteger(KEY_HIGH_SCORE, 0);
+        if (highScore < score) prefs.putInteger(KEY_HIGH_SCORE, score);
 
-        //high score
-        int highScore = prefs.getInteger("highScore", 0);
-        if(highScore < levelHighScore) {
-            prefs.putInteger("highScore", levelHighScore);
-        }
+        int totalGold = prefs.getInteger(KEY_TOTAL_GOLD, 0) + sessionGoldCollected;
+        prefs.putInteger(KEY_TOTAL_GOLD, totalGold);
+
+        int totalTime = prefs.getInteger(KEY_TOTAL_TIME, 0) + sessionTimeSeconds;
+        prefs.putInteger(KEY_TOTAL_TIME, totalTime);
 
         prefs.flush();
     }
 
     public LevelStats getSavedData() {
         return new LevelStats(
-                prefs.getInteger("totalTimesPlayed", 0),
-                prefs.getInteger("highScore", 0)
+            prefs.getInteger(KEY_TIMES_PLAYED, 0),
+            prefs.getInteger(KEY_HIGH_SCORE, 0),
+            prefs.getInteger(KEY_TOTAL_GOLD, 0),
+            prefs.getInteger(KEY_TOTAL_TIME, 0)
         );
     }
 }
