@@ -51,6 +51,7 @@ public class MenuScreen extends BasicMenuScreen {
         //Create buttons
         ImageTextButton playImageButton = new ImageTextButton("Play" ,style);
         ImageTextButton gameStatsButton = new ImageTextButton("Game Stats" ,style);
+        ImageTextButton trophiesButton = new ImageTextButton("Trophies" ,style);
         ImageTextButton tutorialStatsButton = new ImageTextButton("Instructions" ,style);
 
 
@@ -75,12 +76,22 @@ public class MenuScreen extends BasicMenuScreen {
             }
         });
 
+        trophiesButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ScreenManager.getInstance().showScreen(
+                        ScreenEnum.TEXT_SCREEN, game, GameTexts.GAME_TROPHIES_TEXT, GameModeEnum.TROPHIES
+                );
+            }
+        });
+
 
         //Add buttons to table
         mainTable.add(playImageButton).padBottom(10);
         mainTable.row();
         mainTable.add(gameStatsButton).padBottom(10);
         mainTable.row();
+        mainTable.add(trophiesButton).padBottom(10);
         //mainTable.add(tutorialStatsButton);
 
         stage.addActor(background);

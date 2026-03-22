@@ -7,10 +7,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
@@ -141,7 +138,10 @@ public class GameScreen extends ScreenAdapter{
         batch.setProjectionMatrix(camera.projection);
         batch.setTransformMatrix(camera.view);
         batch.begin();
-        batch.draw(truckHead, truckX, truckY);
+        //batch.draw(truckHead, truckX, truckY);
+
+        drawTruckHead();
+
         for (BodyPart bodyPart : bodyParts) {
             bodyPart.draw(batch);
         }
@@ -151,6 +151,37 @@ public class GameScreen extends ScreenAdapter{
         drawGameOver();
         drawScore();
         batch.end();
+    }
+
+    private void drawTruckHead(){
+        TextureRegion region = new TextureRegion(truckHead);
+        float originX = (float) region.getRegionWidth() / 2; // Origin for rotation (center)
+        float originY = (float) region.getRegionHeight() / 2; // Origin for rotation (center)
+        float width = region.getRegionWidth();
+        float height = region.getRegionHeight();
+        float scaleX = 1;
+        float scaleY = 1;
+        float rotation = -90; // Rotation in degrees
+        switch (truckDirection) {
+            case RIGHT: {
+                rotation = -90;
+                break;
+            }
+            case LEFT: {
+                rotation = 90;
+                break;
+            }
+            case UP: {
+                rotation = 0;
+                break;
+            }
+            case DOWN: {
+                rotation = 180;
+                break;
+            }
+        }
+        batch.draw(region, truckX, truckY, originX, originY, width, height, scaleX, scaleY, rotation);
+
     }
 
 

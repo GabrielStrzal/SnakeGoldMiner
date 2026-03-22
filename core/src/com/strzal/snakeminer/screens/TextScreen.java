@@ -127,6 +127,12 @@ public class TextScreen extends BasicMenuScreen {
 //        if(gameMode == GameModeEnum.STORY_MODE){
 //            label.setVariable("weeks", "" + GameSetting.MAXIMUM_WAVE_IN_GAME_MODE);
 //        }
+        if(gameMode == GameModeEnum.TROPHIES){
+            LevelStats stats = game.getGameStatsHandler().getSavedData();
+            label.setVariable("win", "" + stats.getTotalTimesPlayed());
+            label.setVariable("finished", "YES" );
+        }
+
 
         //Add buttons to table
         mainTable.add(label);

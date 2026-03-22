@@ -7,5 +7,6 @@ public enum GameModeEnum {
     LEVEL_COMPLETED,
     LEVEL_COMPLETED_ENDLESS,
     YOU_WON,
-    GAME_STATS;
+    GAME_STATS,
+    TROPHIES;
 }
