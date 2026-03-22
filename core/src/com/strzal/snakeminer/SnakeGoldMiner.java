@@ -3,6 +3,7 @@ package com.strzal.snakeminer;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.strzal.gdxUtilLib.BasicGame;
 import com.strzal.gdxUtilLib.screenManager.ScreenManager;
+import com.strzal.snakeminer.achievement.AchievementHandler;
 import com.strzal.snakeminer.handler.GameStatsHandler;
 import com.strzal.snakeminer.loading.LoadingPathsImpl;
 import com.strzal.snakeminer.screenManager.ScreenEnum;
@@ -12,6 +13,7 @@ public class SnakeGoldMiner extends BasicGame {
 
 	private SpriteBatch batch;
 	private GameStatsHandler gameStatsHandler;
+	private AchievementHandler achievementHandler;
 
 
 	@Override
@@ -19,6 +21,7 @@ public class SnakeGoldMiner extends BasicGame {
 		batch = new SpriteBatch();
 		loadingPaths = new LoadingPathsImpl();
 		gameStatsHandler = new GameStatsHandler();
+		achievementHandler = new AchievementHandler();
 
 		ScreenManager.getInstance().initialize(this);
 		ScreenManager.getInstance()
@@ -36,5 +39,9 @@ public class SnakeGoldMiner extends BasicGame {
 
 	public GameStatsHandler getGameStatsHandler() {
 		return gameStatsHandler;
+	}
+
+	public AchievementHandler getAchievementHandler() {
+		return achievementHandler;
 	}
 }
