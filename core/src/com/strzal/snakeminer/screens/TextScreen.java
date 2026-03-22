@@ -6,14 +6,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.rafaskoberg.gdx.typinglabel.TypingLabel;
 import com.strzal.gdxUtilLib.BasicGame;
 import com.strzal.gdxUtilLib.screenManager.ScreenManager;
 import com.strzal.snakeminer.config.ImagesPaths;
-import com.strzal.snakeminer.handler.LevelStats;
 import com.strzal.snakeminer.screenManager.ScreenEnum;
 
 
@@ -27,7 +26,6 @@ public class TextScreen extends BasicMenuScreen {
         this.textToBeDisplayed = textToBeDisplayed;
         this.gameMode = gameMode;
     }
-
 
     @Override
     public void show() {
@@ -84,24 +82,15 @@ public class TextScreen extends BasicMenuScreen {
     }
 
     private void initText() {
-        TypingLabel label;
+        Label label = new Label(textToBeDisplayed, skin);
+        label.setWrap(true);
 
         Table mainTable = new Table();
         mainTable.setFillParent(true);
         mainTable.left().top();
         mainTable.padLeft(90);
         mainTable.padTop(200);
-
-        label = new TypingLabel(textToBeDisplayed, skin);
-
-        if (gameMode == GameModeEnum.GAME_STATS) {
-            LevelStats stats = game.getGameStatsHandler().getSavedData();
-            label.setVariable("timesPlayed", "" + stats.getTotalTimesPlayed());
-            label.setVariable("highScore",   "" + stats.getHighScore());
-        }
-
-        mainTable.add(label);
-        mainTable.row();
+        mainTable.add(label).width(460f);
 
         stage.addActor(mainTable);
     }

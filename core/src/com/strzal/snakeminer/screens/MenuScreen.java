@@ -61,7 +61,9 @@ public class MenuScreen extends BasicMenuScreen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ScreenManager.getInstance().showScreen(
-                        ScreenEnum.TEXT_SCREEN, game, GameTexts.GAME_STATS_TEXT, GameModeEnum.GAME_STATS
+                        ScreenEnum.TEXT_SCREEN, game,
+                        GameTexts.buildStatsText(game.getGameStatsHandler().getSavedData()),
+                        GameModeEnum.GAME_STATS
                 );
             }
         });

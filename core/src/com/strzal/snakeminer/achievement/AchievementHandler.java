@@ -45,21 +45,20 @@ public class AchievementHandler {
         }
     }
 
-    /** Generates TypingLabel-formatted text listing all achievements for the Trophies screen. */
+    /** Generates plain text listing all achievements for the Trophies screen. */
     public String getDisplayText() {
-        StringBuilder sb = new StringBuilder("{FASTER}");
+        StringBuilder sb = new StringBuilder();
         for (AchievementEnum ach : AchievementEnum.values()) {
             boolean unlocked = isUnlocked(ach);
-            sb.append("\n");
             if (ach.secret && !unlocked) {
-                sb.append("{COLOR=GRAY}[?] ???\n");
-                sb.append("{COLOR=GRAY}    ???\n");
+                sb.append("[?] ???\n");
+                sb.append("    ???\n\n");
             } else if (unlocked) {
-                sb.append("{COLOR=GREEN}[X] ").append(ach.name).append("\n");
-                sb.append("{COLOR=WHITE}    ").append(ach.description).append("\n");
+                sb.append("[X] ").append(ach.name).append("\n");
+                sb.append("    ").append(ach.description).append("\n\n");
             } else {
-                sb.append("{COLOR=GRAY}[ ] ").append(ach.name).append("\n");
-                sb.append("{COLOR=GRAY}    ").append(ach.description).append("\n");
+                sb.append("[ ] ").append(ach.name).append("\n");
+                sb.append("    ").append(ach.description).append("\n\n");
             }
         }
         return sb.toString();
