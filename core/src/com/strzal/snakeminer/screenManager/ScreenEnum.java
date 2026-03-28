@@ -7,6 +7,7 @@ import com.strzal.gdxUtilLib.screenManager.ScreenEnumInterface;
 import com.strzal.gdxUtilLib.screens.LoadingScreen;
 import com.strzal.snakeminer.SnakeGoldMiner;
 import com.strzal.snakeminer.screens.GameModeEnum;
+import com.strzal.snakeminer.screens.GameDifficulty;
 import com.strzal.snakeminer.screens.GameScreen;
 import com.strzal.snakeminer.screens.MenuScreen;
 import com.strzal.snakeminer.screens.StoryGameScreen;
@@ -20,7 +21,7 @@ import com.strzal.snakeminer.screens.TextScreen;
 public enum ScreenEnum implements ScreenEnumInterface {
     GAME_SCREEN {
         public Screen getScreen(Object... params) {
-            return new GameScreen((SnakeGoldMiner)params[0]);
+            return new GameScreen((SnakeGoldMiner)params[0], (GameDifficulty)params[1]);
         }
     },
     TEXT_SCREEN {
@@ -40,7 +41,7 @@ public enum ScreenEnum implements ScreenEnumInterface {
     },
     STORY_GAME_SCREEN {
         public Screen getScreen(Object... params) {
-            return new StoryGameScreen((SnakeGoldMiner)params[0], (Integer)params[1]);
+            return new StoryGameScreen((SnakeGoldMiner)params[0], (Integer)params[1], (GameDifficulty)params[2]);
         }
     },
 //    TUTORIAL_SCREEN {

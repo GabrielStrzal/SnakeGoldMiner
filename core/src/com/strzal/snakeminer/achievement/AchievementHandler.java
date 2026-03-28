@@ -8,7 +8,7 @@ import java.util.List;
 
 public class AchievementHandler {
 
-    private static final String PREFS_NAME = "snake_gold_miner_achievements";
+    private static final String PREFS_NAME = "snake_gold_miner_v1_0";
 
     private final Preferences prefs;
 

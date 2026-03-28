@@ -42,7 +42,7 @@ Screens are created via the `ScreenEnum` factory and switched through `ScreenMan
 - `LOADING_SCREEN` — asset preloader, shown once at startup
 - `MENU_SCREEN` / `MenuScreen` — main menu with Play, Game Stats, Trophies buttons
 - `GAME_SCREEN` / `GameScreen` — core snake gameplay
-- `TEXT_SCREEN` / `TextScreen` — reusable info screen driven by `GameModeEnum` (GAME_STATS, TROPHIES, STORY_MODE, ENDLESS_MODE, LEVEL_COMPLETED, etc.)
+- `TEXT_SCREEN` / `TextScreen` — reusable info screen driven by `GameModeEnum` (GAME_STATS, TROPHIES, STORY_MODE, CLASSIC_MODE, LEVEL_COMPLETED, etc.)
 
 `BasicMenuScreen` is the base class for all UI screens — it sets up a `Stage`, `Viewport`, `Skin`, and `AssetManager` reference. `GameScreen` extends `ScreenAdapter` directly and manages its own camera/batch.
 

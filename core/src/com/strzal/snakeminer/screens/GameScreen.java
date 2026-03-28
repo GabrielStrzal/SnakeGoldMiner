@@ -8,11 +8,11 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.strzal.gdxUtilLib.screenManager.ScreenManager;
 import com.strzal.gdxUtilLib.utils.GdxUtils;
 import com.strzal.snakeminer.SnakeGoldMiner;
 import com.strzal.snakeminer.achievement.AchievementEnum;
@@ -21,6 +21,7 @@ import com.strzal.snakeminer.config.GameConfig;
 import com.strzal.snakeminer.handler.GameStatsHandler;
 import com.strzal.snakeminer.handler.LevelStats;
 import com.strzal.snakeminer.hud.Hud;
+import com.strzal.snakeminer.screenManager.ScreenEnum;
 
 import java.util.List;
 
@@ -35,7 +36,6 @@ public class GameScreen extends ScreenAdapter{
     private static final String GAME_OVER_TEXT = "Game Over... Tap SPACE/ENTER to restart!";
     private static final int POINTS_PER_GOLD = 20;
     private static final int GRID_CELL = 32;
-    private static final float MOVE_TIME = 0.2F;
     private static final int TRUCK_MOVEMENT = 32;
     private static final int RIGHT = 0;
     private static final int LEFT = 1;
@@ -45,9 +45,10 @@ public class GameScreen extends ScreenAdapter{
 
 
     private int truckDirection = RIGHT;
-    private float timer = MOVE_TIME;
+    private float timer;
     private int score = 0;
     private int highScore;
+    private int lives;
 
     // Session stats
     private float sessionTime = 0;
@@ -60,11 +61,12 @@ public class GameScreen extends ScreenAdapter{
     private Texture truckBody;
     private Viewport viewport;
     private Camera camera;
-    private ShapeRenderer shapeRenderer;
     private BitmapFont bitmapFont;
     private GlyphLayout layout = new GlyphLayout();
     private Hud hud;
 
+    private SnakeGoldMiner game;
+    private GameDifficulty difficulty;
     private GameStatsHandler gameStatsHandler;
     private AchievementHandler achievementHandler;
 
@@ -80,18 +82,26 @@ public class GameScreen extends ScreenAdapter{
 
     private boolean directionSet;
     private boolean hasHit = false;
-    private boolean gridOnOff = false;
 
     private int direction = 1;
 
     private int truckXBeforeUpdate = 0, truckYBeforeUpdate = 0;
 
 
-    public GameScreen(SnakeGoldMiner game){
+    public GameScreen(final SnakeGoldMiner game, GameDifficulty difficulty){
+        this.game = game;
+        this.difficulty = difficulty;
+        this.lives = difficulty.maxLives;
+        this.timer = difficulty.moveTime;
         gameStatsHandler = game.getGameStatsHandler();
         achievementHandler = game.getAchievementHandler();
         highScore = gameStatsHandler.getSavedData().getHighScore();
-        hud = new Hud(game, this);
+        hud = new Hud(game, new Runnable() {
+            @Override public void run() {
+                gameStatsHandler.saveLevelData(score, sessionGoldCollected, (int) sessionTime);
+                ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
+            }
+        });
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(hud.getStage());
         Gdx.input.setInputProcessor(inputMultiplexer);
@@ -104,7 +114,6 @@ public class GameScreen extends ScreenAdapter{
         camera.position.set(GameConfig.SCREEN_WIDTH / 2, GameConfig.SCREEN_HEIGHT / 2, 0);
         camera.update();
         bitmapFont = new BitmapFont();
-        shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
         truckHead = new Texture(Gdx.files.internal("truck_up.png"));
         gold = new Texture(Gdx.files.internal("gold.png"));
@@ -115,38 +124,54 @@ public class GameScreen extends ScreenAdapter{
     public void render(float delta) {
         switch(state) {
             case PLAYING: {
-                sessionTime += delta;
-                achievementCheckTimer += delta;
+                if (!hud.isPaused()) {
+                    sessionTime += delta;
+                    achievementCheckTimer += delta;
 
-                queryInput();
-                queryTouchInput();
-                turnGridOnOff();
-                updateTruck(delta);
-                checkGoldCollision();
-                checkAndPlaceGold();
+                    queryInput();
+                    queryTouchInput();
+                    updateTruck(delta);
+                    checkGoldCollision();
+                    checkAndPlaceGold();
 
-                if (achievementCheckTimer >= ACHIEVEMENT_CHECK_INTERVAL) {
-                    achievementCheckTimer = 0;
-                    checkAchievementsMidGame();
+                    if (achievementCheckTimer >= ACHIEVEMENT_CHECK_INTERVAL) {
+                        achievementCheckTimer = 0;
+                        checkAchievementsMidGame();
+                    }
                 }
             }
             break;
             case GAME_OVER: {
-                checkForRestart();
+                if (!hud.isPaused()) checkForRestart();
             }
             break;
         }
         GdxUtils.clearScreen();
-        if(gridOnOff) {drawGrid();}
+        hud.drawBackground(camera, difficulty.displayName, "Lives: " + lives, SCORE_TEXT + score);
         draw();
-        hud.draw();
+        hud.drawStage();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        hud.resize(width, height);
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        bitmapFont.dispose();
+        truckHead.dispose();
+        gold.dispose();
+        truckBody.dispose();
+        hud.dispose();
     }
 
     private void updateTruck(float delta) {
         if(!hasHit) {
             timer -= delta;
             if (timer <= 0) {
-                timer = MOVE_TIME;
+                timer = difficulty.moveTime;
                 moveTruck();
                 checkForOutOfBounds();
                 updateBodyPartsPosition();
@@ -170,7 +195,6 @@ public class GameScreen extends ScreenAdapter{
             batch.draw(gold, goldX, goldY);
         }
         drawGameOver();
-        drawScore();
         batch.end();
     }
 
@@ -193,10 +217,10 @@ public class GameScreen extends ScreenAdapter{
     }
 
     private void checkForOutOfBounds() {
-        if (truckX >= viewport.getWorldWidth())  truckX = 0;
-        if (truckX < 0)                          truckX = (int) (viewport.getWorldWidth() - TRUCK_MOVEMENT);
-        if (truckY >= viewport.getWorldHeight()) truckY = 0;
-        if (truckY < 0)                          truckY = (int) (viewport.getWorldHeight() - TRUCK_MOVEMENT);
+        if (truckX >= viewport.getWorldWidth())        truckX = 0;
+        if (truckX < 0)                                truckX = (int) (viewport.getWorldWidth() - TRUCK_MOVEMENT);
+        if (truckY >= GameConfig.PLAY_AREA_HEIGHT)     truckY = 0;
+        if (truckY < 0)                                truckY = (int) (GameConfig.PLAY_AREA_HEIGHT - TRUCK_MOVEMENT);
     }
 
     private void moveTruck() {
@@ -236,18 +260,11 @@ public class GameScreen extends ScreenAdapter{
         }
     }
 
-    private void turnGridOnOff(){
-        boolean gPressed = Gdx.input.isKeyPressed(Input.Keys.G);
-        if (gPressed) {
-            gridOnOff = !gridOnOff;
-        }
-    }
-
     private void checkAndPlaceGold() {
         if (!goldAvailable) {
             do {
-                goldX = MathUtils.random((int) (viewport.getWorldWidth() / TRUCK_MOVEMENT) - 1) * TRUCK_MOVEMENT;
-                goldY = MathUtils.random((int) (viewport.getWorldHeight() / TRUCK_MOVEMENT) - 1) * TRUCK_MOVEMENT;
+                goldX = MathUtils.random((int) (viewport.getWorldWidth()    / TRUCK_MOVEMENT) - 1) * TRUCK_MOVEMENT;
+                goldY = MathUtils.random((int) (GameConfig.PLAY_AREA_HEIGHT / TRUCK_MOVEMENT) - 1) * TRUCK_MOVEMENT;
                 goldAvailable = true;
             } while (goldX == truckX && goldY == truckY);
         }
@@ -295,18 +312,6 @@ public class GameScreen extends ScreenAdapter{
         }
     }
 
-    private void drawGrid() {
-        shapeRenderer.setProjectionMatrix(camera.projection);
-        shapeRenderer.setTransformMatrix(camera.view);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        for (int x = 0; x < viewport.getWorldWidth(); x += GRID_CELL) {
-            for (int y = 0; y < viewport.getWorldHeight(); y += GRID_CELL) {
-                shapeRenderer.rect(x, y, GRID_CELL, GRID_CELL);
-            }
-        }
-        shapeRenderer.end();
-    }
-
     private void updateIfNotOppositeDirection(int newTruckDirection, int oppositeDirection) {
         if (truckDirection != oppositeDirection) truckDirection = newTruckDirection;
     }
@@ -326,9 +331,23 @@ public class GameScreen extends ScreenAdapter{
     private void checkTruckBodyCollision() {
         for (BodyPart bodyPart : bodyParts) {
             if (bodyPart.x == truckX && bodyPart.y == truckY) {
+                lives--;
                 state = STATE.GAME_OVER;
                 gameStatsHandler.saveLevelData(score, sessionGoldCollected, (int) sessionTime);
-                checkAchievementsMidGame(); // check once more with the now-incremented totalTimesPlayed
+                checkAchievementsMidGame();
+                if (lives <= 0) {
+                    hud.showGameOverPopup(
+                        new Runnable() {
+                            @Override public void run() { doRestart(); }
+                        },
+                        new Runnable() {
+                            @Override public void run() {
+                                gameStatsHandler.saveLevelData(score, sessionGoldCollected, (int) sessionTime);
+                                ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
+                            }
+                        }
+                    );
+                }
             }
         }
     }
@@ -338,11 +357,12 @@ public class GameScreen extends ScreenAdapter{
     }
 
     private void doRestart() {
+        if (lives <= 0) lives = difficulty.maxLives;
         state = STATE.PLAYING;
         bodyParts.clear();
         truckDirection = RIGHT;
         directionSet = false;
-        timer = MOVE_TIME;
+        timer = difficulty.moveTime;
         truckX = 0;
         truckY = 0;
         truckXBeforeUpdate = 0;
@@ -358,21 +378,12 @@ public class GameScreen extends ScreenAdapter{
         score += POINTS_PER_GOLD;
     }
 
-    private void drawScore() {
-        if (state == STATE.PLAYING) {
-            String scoreAsString = Integer.toString(score);
-            bitmapFont.draw(batch, SCORE_TEXT + scoreAsString, (viewport.getWorldWidth()/15), (viewport.getWorldHeight() - 10));
-        }
-    }
-
     private void drawGameOver() {
-        if (state == STATE.GAME_OVER) {
-            String scoreAsString     = Integer.toString(score);
+        if (state == STATE.GAME_OVER && lives > 0) {
             String highScoreAsString = Integer.toString(gameStatsHandler.getSavedData().getHighScore());
-
             drawTextOnScreenCenter(HIGH_SCORE_TEXT + highScoreAsString, 0, 40);
-            drawTextOnScreenCenter(SCORE_TEXT + scoreAsString, 0, 20);
-            drawTextOnScreenCenter(GAME_OVER_TEXT, 0, 0);
+            drawTextOnScreenCenter(SCORE_TEXT + score, 0, 20);
+            drawTextOnScreenCenter(lives + " lives left  —  SPACE/ENTER to continue", 0, 0);
         }
     }
 

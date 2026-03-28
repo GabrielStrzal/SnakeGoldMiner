@@ -16,6 +16,7 @@ import com.strzal.snakeminer.config.GameConfig;
 import com.strzal.snakeminer.config.GamePositions;
 import com.strzal.snakeminer.config.GameTexts;
 import com.strzal.snakeminer.config.ImagesPaths;
+import com.strzal.snakeminer.levels.LevelData;
 import com.strzal.snakeminer.screenManager.ScreenEnum;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ public class MenuScreen extends BasicMenuScreen {
     private final List<ImageTextButton> navButtons = new ArrayList<>();
     private final List<Runnable> navActions = new ArrayList<>();
     private int focusedIndex = 0;
+    private int debugStartLevel = 1;
+    private Label debugLevelLabel;
 
     public MenuScreen(BasicGame game) {
         super(game);
@@ -37,7 +40,8 @@ public class MenuScreen extends BasicMenuScreen {
 
         Table mainTable = new Table();
         mainTable.setFillParent(true);
-        mainTable.bottom().padBottom(30);
+        //mainTable.bottom().padBottom(30);
+        mainTable.right().padRight(40);
 
         Texture button         = assetManager.get(ImagesPaths.MENU_BUTTON);
         Texture button_pressed = assetManager.get(ImagesPaths.MENU_BUTTON_PRESSED);
@@ -51,26 +55,40 @@ public class MenuScreen extends BasicMenuScreen {
                         new TextureRegionDrawable(button),
                         font);
 
-        ImageTextButton storyButton     = new ImageTextButton("Story Mode", style);
-        ImageTextButton endlessButton   = new ImageTextButton("Endless", style);
+        ImageTextButton storyButton     = new ImageTextButton("Normal", style);
+        ImageTextButton hardButton      = new ImageTextButton("Hard", style);
+        ImageTextButton hardcoreButton  = new ImageTextButton("Hardcore", style);
+        ImageTextButton classicButton   = new ImageTextButton("Classic", style);
         ImageTextButton gameStatsButton = new ImageTextButton("Game Stats", style);
         ImageTextButton trophiesButton  = new ImageTextButton("Trophies", style);
 
         boolean storyCompleted = game.getGameStatsHandler().isStoryCompleted();
         if (!storyCompleted) {
-            endlessButton.getLabel().setColor(Color.GRAY);
+            classicButton.getLabel().setColor(Color.GRAY);
+            hardButton.getLabel().setColor(Color.GRAY);
+            hardcoreButton.getLabel().setColor(Color.GRAY);
         }
 
         Image background = new Image((Texture) game.getAssetManager().get(ImagesPaths.MENU_BACKGROUND));
 
         final Runnable goStory = new Runnable() {
             @Override public void run() {
-                ScreenManager.getInstance().showScreen(ScreenEnum.STORY_GAME_SCREEN, game, 1);
+                ScreenManager.getInstance().showScreen(ScreenEnum.STORY_GAME_SCREEN, game, debugStartLevel, GameDifficulty.NORMAL);
             }
         };
-        final Runnable goEndless = new Runnable() {
+        final Runnable goClassic = new Runnable() {
             @Override public void run() {
-                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game);
+                ScreenManager.getInstance().showScreen(ScreenEnum.GAME_SCREEN, game, GameDifficulty.CLASSIC);
+            }
+        };
+        final Runnable goHard = new Runnable() {
+            @Override public void run() {
+                ScreenManager.getInstance().showScreen(ScreenEnum.STORY_GAME_SCREEN, game, debugStartLevel, GameDifficulty.HARD);
+            }
+        };
+        final Runnable goHardcore = new Runnable() {
+            @Override public void run() {
+                ScreenManager.getInstance().showScreen(ScreenEnum.STORY_GAME_SCREEN, game, debugStartLevel, GameDifficulty.HARDCORE);
             }
         };
         final Runnable goStats = new Runnable() {
@@ -96,8 +114,14 @@ public class MenuScreen extends BasicMenuScreen {
             @Override public void clicked(InputEvent event, float x, float y) { goStory.run(); }
         });
         if (storyCompleted) {
-            endlessButton.addListener(new ClickListener() {
-                @Override public void clicked(InputEvent event, float x, float y) { goEndless.run(); }
+            classicButton.addListener(new ClickListener() {
+                @Override public void clicked(InputEvent event, float x, float y) { goClassic.run(); }
+            });
+            hardButton.addListener(new ClickListener() {
+                @Override public void clicked(InputEvent event, float x, float y) { goHard.run(); }
+            });
+            hardcoreButton.addListener(new ClickListener() {
+                @Override public void clicked(InputEvent event, float x, float y) { goHardcore.run(); }
             });
         }
         gameStatsButton.addListener(new ClickListener() {
@@ -111,14 +135,27 @@ public class MenuScreen extends BasicMenuScreen {
         navActions.clear();
         navButtons.add(storyButton);     navActions.add(goStory);
         if (storyCompleted) {
-            navButtons.add(endlessButton); navActions.add(goEndless);
+            navButtons.add(classicButton);  navActions.add(goClassic);
+            navButtons.add(hardButton);     navActions.add(goHard);
+            navButtons.add(hardcoreButton); navActions.add(goHardcore);
         }
         navButtons.add(gameStatsButton); navActions.add(goStats);
         navButtons.add(trophiesButton);  navActions.add(goTrophies);
 
+        if (GameConfig.debug) {
+            Label.LabelStyle debugStyle = new Label.LabelStyle(new BitmapFont(), Color.YELLOW);
+            debugLevelLabel = new Label(debugLevelText(), debugStyle);
+            mainTable.add(debugLevelLabel).padBottom(6);
+            mainTable.row();
+        }
+
         mainTable.add(storyButton).padBottom(10);
         mainTable.row();
-        mainTable.add(endlessButton).padBottom(10);
+        mainTable.add(classicButton).padBottom(10);
+        mainTable.row();
+        mainTable.add(hardButton).padBottom(10);
+        mainTable.row();
+        mainTable.add(hardcoreButton).padBottom(10);
         mainTable.row();
         mainTable.add(gameStatsButton).padBottom(10);
         mainTable.row();
@@ -148,9 +185,23 @@ public class MenuScreen extends BasicMenuScreen {
                     navActions.get(focusedIndex).run();
                     return true;
                 }
+                if (GameConfig.debug && keycode == Input.Keys.RIGHT) {
+                    debugStartLevel = Math.min(debugStartLevel + 1, LevelData.totalLevels());
+                    debugLevelLabel.setText(debugLevelText());
+                    return true;
+                }
+                if (GameConfig.debug && keycode == Input.Keys.LEFT) {
+                    debugStartLevel = Math.max(debugStartLevel - 1, 1);
+                    debugLevelLabel.setText(debugLevelText());
+                    return true;
+                }
                 return false;
             }
         });
+    }
+
+    private String debugLevelText() {
+        return "< Start Level: " + debugStartLevel + " / " + LevelData.totalLevels() + " >";
     }
 
     private void updateFocusVisual() {

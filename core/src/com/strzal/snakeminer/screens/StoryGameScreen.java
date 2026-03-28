@@ -4,20 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.strzal.gdxUtilLib.screenManager.ScreenManager;
@@ -27,7 +20,7 @@ import com.strzal.snakeminer.achievement.AchievementEnum;
 import com.strzal.snakeminer.config.GameConfig;
 import com.strzal.snakeminer.config.ImagesPaths;
 import com.strzal.snakeminer.handler.LevelStats;
-import com.strzal.snakeminer.hud.AchievementBanner;
+import com.strzal.snakeminer.hud.Hud;
 import com.strzal.snakeminer.levels.LevelData;
 import com.strzal.snakeminer.screenManager.ScreenEnum;
 
@@ -38,8 +31,7 @@ public class StoryGameScreen extends ScreenAdapter {
     private static final int POINTS_PER_GOLD = 20;
     private static final int CELL      = 32;
     private static final int MAP_COLS  = 20;
-    private static final int MAP_ROWS  = 15;
-    private static final float MOVE_TIME = 0.2f;
+    private static final int MAP_ROWS  = 14;
     private static final int RIGHT = 0, LEFT = 1, UP = 2, DOWN = 3;
 
     private enum State { PLAYING, LEVEL_COMPLETE, GAME_OVER, YOU_WON }
@@ -47,6 +39,7 @@ public class StoryGameScreen extends ScreenAdapter {
     // ── Core references ───────────────────────────────────────────────────
     private final SnakeGoldMiner game;
     private final int startLevel;
+    private final GameDifficulty difficulty;
 
     // ── Snake state ───────────────────────────────────────────────────────
     private int truckX, truckY, truckXBefore, truckYBefore;
@@ -66,25 +59,26 @@ public class StoryGameScreen extends ScreenAdapter {
     private State state;
     private float sessionTime;
     private boolean sessionSaved;
+    private int lives;
 
     // ── Rendering ─────────────────────────────────────────────────────────
     private SpriteBatch batch;
-    private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     private GlyphLayout layout;
     private OrthographicCamera camera;
     private FitViewport viewport;
-    private Texture truckHeadTex, goldTex, truckBodyTex;
-    private Stage hudStage;
-    private AchievementBanner achievementBanner;
+    private Texture truckHeadTex, goldTex, truckBodyTex, wallTex, tntTex;
+    private Hud hud;
 
     // ─────────────────────────────────────────────────────────────────────
 
-    public StoryGameScreen(SnakeGoldMiner game, int startLevel) {
+    public StoryGameScreen(final SnakeGoldMiner game, int startLevel, GameDifficulty difficulty) {
         this.game = game;
         this.startLevel = startLevel;
-        bodyParts = new Array<>();
-        explosives = new Array<>();
+        this.difficulty = difficulty;
+        this.lives = difficulty.maxLives;
+        bodyParts = new Array<int[]>();
+        explosives = new Array<Explosive>();
     }
 
     @Override
@@ -95,46 +89,27 @@ public class StoryGameScreen extends ScreenAdapter {
         camera.update();
 
         batch = new SpriteBatch();
-        shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         layout = new GlyphLayout();
 
         truckHeadTex = new Texture(Gdx.files.internal("truck_up.png"));
         goldTex      = new Texture(Gdx.files.internal("gold.png"));
         truckBodyTex = new Texture(Gdx.files.internal("cart.png"));
+        wallTex      = new Texture(Gdx.files.internal(ImagesPaths.WALL));
+        tntTex       = new Texture(Gdx.files.internal(ImagesPaths.TNT));
 
-        setupHudStage();
-        loadLevel(startLevel);
-    }
-
-    private void setupHudStage() {
-        hudStage = new Stage(new FitViewport(GameConfig.SCREEN_WIDTH, GameConfig.SCREEN_HEIGHT));
-
-        Texture btn  = game.getAssetManager().get(ImagesPaths.MENU_BUTTON);
-        Texture btnP = game.getAssetManager().get(ImagesPaths.MENU_BUTTON_PRESSED);
-        BitmapFont hudFont = new BitmapFont();
-
-        ImageTextButton.ImageTextButtonStyle style = new ImageTextButton.ImageTextButtonStyle(
-                new TextureRegionDrawable(btn), new TextureRegionDrawable(btnP),
-                new TextureRegionDrawable(btn), hudFont);
-
-        ImageTextButton exitButton = new ImageTextButton("Exit", style);
-        exitButton.setSize(60, 20);
-        exitButton.setPosition(GameConfig.SCREEN_WIDTH - 80, GameConfig.SCREEN_HEIGHT - 30);
-        exitButton.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
+        hud = new Hud(game, new Runnable() {
+            @Override public void run() {
                 saveSessionIfNeeded(false);
                 ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
             }
         });
-        hudStage.addActor(exitButton);
-
-        achievementBanner = new AchievementBanner();
-        hudStage.addActor(achievementBanner);
 
         InputMultiplexer im = new InputMultiplexer();
-        im.addProcessor(hudStage);
+        im.addProcessor(hud.getStage());
         Gdx.input.setInputProcessor(im);
+
+        loadLevel(startLevel);
     }
 
     // ── Level loading ─────────────────────────────────────────────────────
@@ -147,7 +122,7 @@ public class StoryGameScreen extends ScreenAdapter {
         truckXBefore = 0; truckYBefore = 0;
         truckDirection = RIGHT;
         directionSet = false;
-        moveTimer = MOVE_TIME;
+        moveTimer = difficulty.moveTime;
         bodyParts.clear();
         goldAvailable = false;
         goldCollectedThisLevel = 0;
@@ -173,21 +148,25 @@ public class StoryGameScreen extends ScreenAdapter {
     public void render(float delta) {
         switch (state) {
             case PLAYING:
-                sessionTime += delta;
-                queryInput();
-                updateExplosives(delta);
-                updateSnake(delta);
+                if (!hud.isPaused()) {
+                    sessionTime += delta;
+                    queryInput();
+                    updateExplosives(delta);
+                    updateSnake(delta);
+                }
                 break;
             case LEVEL_COMPLETE:
                 if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER))
                     loadLevel(currentLevel + 1);
                 break;
             case GAME_OVER:
-                if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER))
-                    loadLevel(currentLevel);
-                if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-                    ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
-                    return;
+                if (!hud.isPaused()) {
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER))
+                        loadLevel(currentLevel);
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                        ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
+                        return;
+                    }
                 }
                 break;
             case YOU_WON:
@@ -200,13 +179,16 @@ public class StoryGameScreen extends ScreenAdapter {
                 break;
         }
 
+        String goldInfo = "Gold: " + goldCollectedThisLevel + "/" + levelData.goldTarget
+                + "  Score: " + score;
+
         GdxUtils.clearScreen();
+        hud.drawBackground(camera, "Level: " + currentLevel, "Lives: " + lives, goldInfo);
         renderWalls();
         renderExplosives();
         renderGame();
-        renderOverlayText();
-        hudStage.act(delta);
-        hudStage.draw();
+        renderOverlay();
+        hud.drawStage();
     }
 
     // ── Input ─────────────────────────────────────────────────────────────
@@ -230,7 +212,7 @@ public class StoryGameScreen extends ScreenAdapter {
     private void updateSnake(float delta) {
         moveTimer -= delta;
         if (moveTimer > 0) return;
-        moveTimer = MOVE_TIME;
+        moveTimer = difficulty.moveTime;
 
         truckXBefore = truckX;
         truckYBefore = truckY;
@@ -242,11 +224,11 @@ public class StoryGameScreen extends ScreenAdapter {
             case DOWN:  truckY -= CELL; break;
         }
 
-        // Wrap around edges
-        if (truckX >= GameConfig.SCREEN_WIDTH)  truckX = 0;
-        if (truckX < 0)                         truckX = (MAP_COLS - 1) * CELL;
-        if (truckY >= GameConfig.SCREEN_HEIGHT) truckY = 0;
-        if (truckY < 0)                         truckY = (MAP_ROWS - 1) * CELL;
+        // Wrap around play area edges
+        if (truckX >= GameConfig.SCREEN_WIDTH)    truckX = 0;
+        if (truckX < 0)                           truckX = (MAP_COLS - 1) * CELL;
+        if (truckY >= GameConfig.PLAY_AREA_HEIGHT) truckY = 0;
+        if (truckY < 0)                           truckY = (MAP_ROWS - 1) * CELL;
 
         if (isWall(truckX, truckY) || isOnVisibleExplosive(truckX, truckY)) {
             triggerGameOver(); return;
@@ -287,7 +269,7 @@ public class StoryGameScreen extends ScreenAdapter {
 
     private void checkAndPlaceGold() {
         if (goldAvailable) return;
-        Array<int[]> candidates = new Array<>();
+        Array<int[]> candidates = new Array<int[]>();
         for (int row = 0; row < MAP_ROWS; row++) {
             for (int col = 0; col < MAP_COLS; col++) {
                 if (levelData.map[row][col] == 0) {
@@ -334,8 +316,24 @@ public class StoryGameScreen extends ScreenAdapter {
     // ── State transitions ─────────────────────────────────────────────────
 
     private void triggerGameOver() {
+        lives--;
         state = State.GAME_OVER;
         saveSessionIfNeeded(false);
+        if (lives <= 0) {
+            hud.showGameOverPopup(
+                new Runnable() {
+                    @Override public void run() {
+                        lives = difficulty.maxLives;
+                        loadLevel(1);
+                    }
+                },
+                new Runnable() {
+                    @Override public void run() {
+                        ScreenManager.getInstance().showScreen(ScreenEnum.MENU_SCREEN, game);
+                    }
+                }
+            );
+        }
     }
 
     private void triggerLevelComplete() {
@@ -362,33 +360,31 @@ public class StoryGameScreen extends ScreenAdapter {
                 storyCompleted
         );
         for (AchievementEnum ach : newlyUnlocked) {
-            achievementBanner.show(ach);
+            hud.showAchievementBanner(ach);
         }
     }
 
     // ── Rendering ─────────────────────────────────────────────────────────
 
     private void renderWalls() {
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.DARK_GRAY);
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
         for (int row = 0; row < MAP_ROWS; row++) {
             for (int col = 0; col < MAP_COLS; col++) {
                 if (levelData.map[row][col] == 1)
-                    shapeRenderer.rect(col * CELL, (MAP_ROWS - 1 - row) * CELL, CELL, CELL);
+                    batch.draw(wallTex, col * CELL, (MAP_ROWS - 1 - row) * CELL, CELL, CELL);
             }
         }
-        shapeRenderer.end();
+        batch.end();
     }
 
     private void renderExplosives() {
-        shapeRenderer.setProjectionMatrix(camera.combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.RED);
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
         for (Explosive e : explosives) {
-            if (e.visible) shapeRenderer.rect(e.x, e.y, CELL, CELL);
+            if (e.visible) batch.draw(tntTex, e.x, e.y, CELL, CELL);
         }
-        shapeRenderer.end();
+        batch.end();
     }
 
     private void renderGame() {
@@ -412,22 +408,16 @@ public class StoryGameScreen extends ScreenAdapter {
         batch.end();
     }
 
-    private void renderOverlayText() {
+    private void renderOverlay() {
+        if (state == State.PLAYING) return;
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-
-        font.draw(batch,
-                "Level: " + currentLevel + "   Gold: " + goldCollectedThisLevel +
-                "/" + levelData.goldTarget + "   Score: " + score,
-                10, GameConfig.SCREEN_HEIGHT - 10);
-
         if (state == State.LEVEL_COMPLETE)
             drawCentered("Level " + currentLevel + " Complete!  SPACE/ENTER for next level", 0);
-        else if (state == State.GAME_OVER)
-            drawCentered("Game Over!  SPACE/ENTER to retry   ESC for menu", 0);
+        else if (state == State.GAME_OVER && lives > 0)
+            drawCentered("Game Over!  " + lives + " lives left.  SPACE/ENTER to retry   ESC for menu", 0);
         else if (state == State.YOU_WON)
             drawCentered("You Won! Congratulations!  SPACE/ENTER or ESC for menu", 0);
-
         batch.end();
     }
 
@@ -435,7 +425,7 @@ public class StoryGameScreen extends ScreenAdapter {
         layout.setText(font, text);
         font.draw(batch, text,
                 (GameConfig.SCREEN_WIDTH  - layout.width)  / 2f,
-                (GameConfig.SCREEN_HEIGHT - layout.height) / 2f + offsetY);
+                (GameConfig.PLAY_AREA_HEIGHT - layout.height) / 2f + offsetY);
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
@@ -443,19 +433,19 @@ public class StoryGameScreen extends ScreenAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
-        hudStage.getViewport().update(width, height);
+        hud.resize(width, height);
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        shapeRenderer.dispose();
         font.dispose();
         truckHeadTex.dispose();
         goldTex.dispose();
         truckBodyTex.dispose();
-        achievementBanner.dispose();
-        hudStage.dispose();
+        wallTex.dispose();
+        tntTex.dispose();
+        hud.dispose();
     }
 
     // ── Inner class: Explosive ────────────────────────────────────────────
