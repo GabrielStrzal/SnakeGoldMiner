@@ -9,6 +9,9 @@ public class ImagesPaths {
 
     public static final String GAME_TEXT_BACKGROUND = "menu/text_screen_640x480.png";
 
+    //Trophies
+    public static final String THROPHY = "throphy.png";
+
     //Game
     public static final String BK_1  = "bk_1.png";
     public static final String BK_2  = "bk_2.png";

@@ -288,7 +288,7 @@ public class GameScreen extends ScreenAdapter{
         int totalTime  = saved.getTotalPlayTimeSeconds()  + (int) sessionTime;
         int totalPlays = saved.getTotalTimesPlayed();
 
-        List<AchievementEnum> newlyUnlocked = achievementHandler.checkAndUnlock(totalPlays, totalGold, totalTime, false);
+        List<AchievementEnum> newlyUnlocked = achievementHandler.checkAndUnlock(totalPlays, totalGold, totalTime, false, false, false);
         for (AchievementEnum ach : newlyUnlocked) {
             hud.showAchievementBanner(ach);
         }

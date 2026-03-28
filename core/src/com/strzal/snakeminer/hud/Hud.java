@@ -193,9 +193,9 @@ public class Hud {
         float textY = GameConfig.PLAY_AREA_HEIGHT + 22;
         hudBatch.setProjectionMatrix(camera.combined);
         hudBatch.begin();
-        font.draw(hudBatch, levelText, 10, textY);
-        font.draw(hudBatch, livesText, GameConfig.SCREEN_WIDTH / 2f - 30, textY);
-        font.draw(hudBatch, scoreText, GameConfig.SCREEN_WIDTH - 180, textY);
+        font.draw(hudBatch, levelText, 10,  textY);
+        font.draw(hudBatch, livesText, 190, textY);
+        font.draw(hudBatch, scoreText, 340, textY);
         hudBatch.end();
     }
 }

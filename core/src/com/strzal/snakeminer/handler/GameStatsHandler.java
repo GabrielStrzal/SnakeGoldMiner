@@ -3,15 +3,19 @@ package com.strzal.snakeminer.handler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 
+import static com.strzal.snakeminer.config.GameConfig.PREFS_NAME;
+
 public class GameStatsHandler {
 
-    private static final String KEY_TIMES_PLAYED    = "totalTimesPlayed";
-    private static final String KEY_HIGH_SCORE       = "highScore";
-    private static final String KEY_TOTAL_GOLD       = "totalGoldCollected";
-    private static final String KEY_TOTAL_TIME       = "totalPlayTimeSeconds";
-    private static final String KEY_STORY_COMPLETED  = "storyCompleted";
+    private static final String KEY_TIMES_PLAYED      = "totalTimesPlayed";
+    private static final String KEY_HIGH_SCORE         = "highScore";
+    private static final String KEY_TOTAL_GOLD         = "totalGoldCollected";
+    private static final String KEY_TOTAL_TIME         = "totalPlayTimeSeconds";
+    private static final String KEY_STORY_COMPLETED    = "storyCompleted";
+    private static final String KEY_HARD_COMPLETED     = "hardCompleted";
+    private static final String KEY_HARDCORE_COMPLETED = "hardcoreCompleted";
 
-    private final Preferences prefs = Gdx.app.getPreferences("snake_gold_miner_v1_0");
+    private final Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
 
     public GameStatsHandler() {}
 
@@ -43,9 +47,19 @@ public class GameStatsHandler {
         prefs.flush();
     }
 
-    public boolean isStoryCompleted() {
-        return prefs.getBoolean(KEY_STORY_COMPLETED, false);
+    public void saveHardCompleted() {
+        prefs.putBoolean(KEY_HARD_COMPLETED, true);
+        prefs.flush();
     }
+
+    public void saveHardcoreCompleted() {
+        prefs.putBoolean(KEY_HARDCORE_COMPLETED, true);
+        prefs.flush();
+    }
+
+    public boolean isStoryCompleted()    { return prefs.getBoolean(KEY_STORY_COMPLETED,    false); }
+    public boolean isHardCompleted()     { return prefs.getBoolean(KEY_HARD_COMPLETED,     false); }
+    public boolean isHardcoreCompleted() { return prefs.getBoolean(KEY_HARDCORE_COMPLETED, false); }
 
     public LevelStats getSavedData() {
         return new LevelStats(

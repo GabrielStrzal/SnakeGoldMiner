@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.strzal.gdxUtilLib.BasicGame;
 import com.strzal.gdxUtilLib.screenManager.ScreenManager;
+import com.strzal.snakeminer.config.GameConfig;
 import com.strzal.snakeminer.config.ImagesPaths;
 import com.strzal.snakeminer.screenManager.ScreenEnum;
 
@@ -21,10 +22,12 @@ import com.strzal.snakeminer.screenManager.ScreenEnum;
 public class TextScreen extends BasicMenuScreen {
 
     private String textToBeDisplayed;
+    private GameModeEnum gameMode;
 
     public TextScreen(BasicGame game, String textToBeDisplayed, GameModeEnum gameMode) {
         super(game);
         this.textToBeDisplayed = textToBeDisplayed;
+        this.gameMode = gameMode;
     }
 
     @Override
@@ -73,6 +76,15 @@ public class TextScreen extends BasicMenuScreen {
 
         stage.addActor(background);
         stage.addActor(mainTable);
+
+        if (gameMode == GameModeEnum.TROPHIES) {
+            Image throphyImage = new Image((Texture) assetManager.get(ImagesPaths.THROPHY));
+            throphyImage.setPosition(
+                (GameConfig.SCREEN_WIDTH  - throphyImage.getWidth())  / 2f,
+                GameConfig.SCREEN_HEIGHT  - throphyImage.getHeight()  - 10
+            );
+            stage.addActor(throphyImage);
+        }
 
         initText();
     }

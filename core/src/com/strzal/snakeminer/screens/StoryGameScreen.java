@@ -19,6 +19,7 @@ import com.strzal.snakeminer.SnakeGoldMiner;
 import com.strzal.snakeminer.achievement.AchievementEnum;
 import com.strzal.snakeminer.config.GameConfig;
 import com.strzal.snakeminer.config.ImagesPaths;
+import com.strzal.snakeminer.handler.GameStatsHandler;
 import com.strzal.snakeminer.handler.LevelStats;
 import com.strzal.snakeminer.hud.Hud;
 import com.strzal.snakeminer.levels.LevelData;
@@ -342,22 +343,29 @@ public class StoryGameScreen extends ScreenAdapter {
         saveSessionIfNeeded(won);
     }
 
-    private void saveSessionIfNeeded(boolean storyJustCompleted) {
+    private void saveSessionIfNeeded(boolean justCompleted) {
         if (!sessionSaved) {
             game.getGameStatsHandler().saveLevelData(score, goldCollectedThisLevel, (int) sessionTime);
-            if (storyJustCompleted) game.getGameStatsHandler().saveStoryCompleted();
-            checkAchievements(storyJustCompleted);
+            if (justCompleted) {
+                if      (difficulty == GameDifficulty.HARD)     game.getGameStatsHandler().saveHardCompleted();
+                else if (difficulty == GameDifficulty.HARDCORE)  game.getGameStatsHandler().saveHardcoreCompleted();
+                else                                             game.getGameStatsHandler().saveStoryCompleted();
+            }
+            checkAchievements();
             sessionSaved = true;
         }
     }
 
-    private void checkAchievements(boolean storyCompleted) {
+    private void checkAchievements() {
         LevelStats saved = game.getGameStatsHandler().getSavedData();
+        GameStatsHandler stats = game.getGameStatsHandler();
         List<AchievementEnum> newlyUnlocked = game.getAchievementHandler().checkAndUnlock(
                 saved.getTotalTimesPlayed(),
                 saved.getTotalGoldCollected(),
                 saved.getTotalPlayTimeSeconds(),
-                storyCompleted
+                stats.isStoryCompleted(),
+                stats.isHardCompleted(),
+                stats.isHardcoreCompleted()
         );
         for (AchievementEnum ach : newlyUnlocked) {
             hud.showAchievementBanner(ach);

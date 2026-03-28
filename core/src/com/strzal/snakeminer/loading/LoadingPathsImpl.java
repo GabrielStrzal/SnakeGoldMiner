@@ -17,6 +17,7 @@ public class LoadingPathsImpl implements LoadingPaths {
         list.add(ImagesPaths.MENU_BUTTON_PRESSED);
 
         list.add(ImagesPaths.GAME_TEXT_BACKGROUND);
+        list.add(ImagesPaths.THROPHY);
 
 
         return list;

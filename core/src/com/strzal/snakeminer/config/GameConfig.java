@@ -21,9 +21,11 @@ public class GameConfig {
     public static final float MOVE_TIME_HARD    = 0.10f;
     public static final int   MAX_LIVES_CLASSIC = 5;
 
-    public static final String GAME_VERSION = "V.1.1";
+    public static final String GAME_VERSION = "V.2.0";
+    public static final String PREFS_NAME = "snake_gold_miner_v2_0";
 
-    public static final boolean debug = true;
+
+    public static final boolean debug = false;
 
     private GameConfig(){}
 }

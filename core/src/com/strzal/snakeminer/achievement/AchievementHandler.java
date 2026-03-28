@@ -6,9 +6,10 @@ import com.badlogic.gdx.Preferences;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.strzal.snakeminer.config.GameConfig.PREFS_NAME;
+
 public class AchievementHandler {
 
-    private static final String PREFS_NAME = "snake_gold_miner_v1_0";
 
     private final Preferences prefs;
 
@@ -20,10 +21,12 @@ public class AchievementHandler {
      * Checks all achievements against the given cumulative stats.
      * Returns the list of achievements that were newly unlocked by this call.
      */
-    public List<AchievementEnum> checkAndUnlock(int totalTimesPlayed, int totalGoldCollected, int totalPlayTimeSeconds, boolean storyCompleted) {
+    public List<AchievementEnum> checkAndUnlock(int totalTimesPlayed, int totalGoldCollected, int totalPlayTimeSeconds,
+                                                boolean storyCompleted, boolean hardCompleted, boolean hardcoreCompleted) {
         List<AchievementEnum> newlyUnlocked = new ArrayList<>();
         for (AchievementEnum ach : AchievementEnum.values()) {
-            if (!isUnlocked(ach) && isConditionMet(ach, totalTimesPlayed, totalGoldCollected, totalPlayTimeSeconds, storyCompleted)) {
+            if (!isUnlocked(ach) && isConditionMet(ach, totalTimesPlayed, totalGoldCollected, totalPlayTimeSeconds,
+                    storyCompleted, hardCompleted, hardcoreCompleted)) {
                 prefs.putBoolean(ach.name(), true);
                 prefs.flush();
                 newlyUnlocked.add(ach);
@@ -36,13 +39,16 @@ public class AchievementHandler {
         return prefs.getBoolean(ach.name(), false);
     }
 
-    private boolean isConditionMet(AchievementEnum ach, int totalTimesPlayed, int totalGoldCollected, int totalPlayTimeSeconds, boolean storyCompleted) {
+    private boolean isConditionMet(AchievementEnum ach, int totalTimesPlayed, int totalGoldCollected, int totalPlayTimeSeconds,
+                                   boolean storyCompleted, boolean hardCompleted, boolean hardcoreCompleted) {
         switch (ach) {
-            case STORY_COMPLETED: return storyCompleted;
-            case MATCHES_20:      return totalTimesPlayed >= 20;
-            case PLAYTIME_2H:     return totalPlayTimeSeconds >= 7200;
-            case GOLD_TOTAL_20:   return totalGoldCollected >= 1000;
-            default:              return false;
+            case STORY_COMPLETED:    return storyCompleted;
+            case HARD_COMPLETED:     return hardCompleted;
+            case HARDCORE_COMPLETED: return hardcoreCompleted;
+            case MATCHES_20:         return totalTimesPlayed >= 20;
+            case PLAYTIME_2H:        return totalPlayTimeSeconds >= 7200;
+            case GOLD_TOTAL_20:      return totalGoldCollected >= 1000;
+            default:                 return false;
         }
     }
 
